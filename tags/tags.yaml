@@ -1,0 +1,40 @@
+- name: update cache apt, install git, make, nodejs, create 3 users
+  hosts: server1
+  remote_user: yc-user
+  become: yes
+  tasks: 
+    - name: update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+      tags: update
+    
+    - name: install git, make, nodejs
+      ansible.builtin.apt:
+        name: 
+          - git
+          - make
+          - nodejs
+        state: present
+      tags: install
+
+    - name: create 3 users
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        password: "{{ item.password }}"
+        shell: /bin/bash
+        state: present
+      with_items:
+        - { name: user1, password: 'user1' }
+        - { name: user2, password: 'user2' }
+        - { name: user3, password: 'user3' }
+      tags: create_users
+
+    - name: Get system users
+      ansible.builtin.shell: getent passwd
+      register: system_users
+      tags: display
+
+    - name: Display system users
+      ansible.builtin.debug:
+        msg: "{{ system_users.stdout_lines }}"
+      tags: display

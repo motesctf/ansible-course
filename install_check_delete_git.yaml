@@ -1,0 +1,32 @@
+- name: install, check, delete git
+  hosts: all
+  remote_user: yc-user
+  become: yes
+  tasks:
+    - name: install git
+      ansible.builtin.apt:
+        name: git
+        state: present
+
+    - name: gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: check git install
+      debug:
+        msg: "git installed"
+      when: "'git' in ansible_facts.packages"
+
+    - name: remove git
+      ansible.builtin.apt:
+        name: git
+        state: absent
+
+    - name: gather package facts after remove
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: check git removed
+      debug:
+        msg: "git removed"
+      when: "'git' not in ansible_facts.packages"
